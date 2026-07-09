@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SearchEvent",
+  "description": "One search request/response observed by a service. Version 1.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_time",
+    "service",
+    "endpoint",
+    "request_id",
+    "trace_id",
+    "status_code",
+    "latency_ms"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "event_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request completed, set by the producing service."
+    },
+    "ingest_time": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Set by the ingest service; null at the producer. event_time vs ingest_time exposes pipeline lag."
+    },
+    "service": { "type": "string", "description": "Producing service, e.g. query-frontend." },
+    "endpoint": { "type": "string", "description": "Logical route, e.g. /search." },
+    "request_id": { "type": "string", "description": "Unique per request." },
+    "trace_id": { "type": "string", "description": "Shared across the services that handled the request." },
+    "query_hash": { "type": "string", "description": "Hashed query — never the raw query text (privacy)." },
+    "top_k": { "type": "integer", "minimum": 0 },
+    "result_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 10,
+      "description": "Truncated top results; full result sets are not telemetry."
+    },
+    "status_code": { "type": "integer", "minimum": 100, "maximum": 599 },
+    "error_type": {
+      "type": ["string", "null"],
+      "enum": ["timeout", "downstream", "validation", "internal", null]
+    },
+    "latency_ms": { "type": "number", "minimum": 0 },
+    "relevance_score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Offline/online relevance signal in [0,1]; null when not scored."
+    }
+  },
+  "additionalProperties": false
+}
